@@ -10,7 +10,10 @@ my $remote_port_range;
 my $local_ports;
 my $first_port;
 my $last_port;
+my $hasfailed = 0;
+my $ret;
 my @localports;
+my @failed;
 
 
 open(my $cfg, "<", "stunnels.cfg")
@@ -75,13 +78,26 @@ foreach(@localports)
     for(my $i = $first_port;$i<$last_port+1;$i++)
     {
         my $cmd = qq{ssh -q -o ExitOnForwardFailure=yes -f -N -R $i:localhost:$_ $remote_user\@$remote_ssh_host -p $remote_ssh_port};
-        my $ret = system($cmd);
+        $ret = system($cmd);
         if($ret == 0)
         {
             print qq{Successfully forwarded localhost:$_ to $remote_ssh_host:$i\n};
             last;
         }
     }
+    if($ret != 0)
+    {
+        $hasfailed = 1;
+        push @failed, $_;
+    }
 }
 
+if($hasfailed == 1)
+{
+    print qq{failed to forward the following ports:\n};
+    foreach(@failed)
+    {
+        print qq{$_\n};
+    }
+}
 
