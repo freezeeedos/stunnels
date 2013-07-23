@@ -10,8 +10,11 @@ my $remote_port_range;
 my $local_ports;
 my $first_port;
 my $last_port;
+my $cmd;
 my $hasfailed = 0;
-my $ret;
+my $ret = 0;
+my $killmode = 0;
+my $i = 0;
 my @localports;
 my @failed;
 
@@ -19,6 +22,16 @@ my @failed;
 open(my $cfg, "<", "stunnels.cfg")
     or die qq{can't open config file: $!};
 my @cfg = <$cfg>;
+
+foreach(@ARGV)
+{
+    if(($_ eq qq{-k}) or ($_ eq qq{--kill}))
+    {
+#         print qq{Kill mode.\n};
+        $killmode = 1;
+#         exit 0;
+    }
+}
 
 foreach(@cfg)
 {
@@ -75,14 +88,44 @@ foreach(@localports)
         print qq{Please specify valid local ports};
         exit -1;
     }
-    for(my $i = $first_port;$i<$last_port+1;$i++)
+    for($i = $first_port;$i<$last_port+1;$i++)
     {
-        my $cmd = qq{ssh -q -o ExitOnForwardFailure=yes -f -N -R $i:localhost:$_ $remote_user\@$remote_ssh_host -p $remote_ssh_port};
-        $ret = system($cmd);
-        if($ret == 0)
+        $cmd = qq{ssh -q -o ExitOnForwardFailure=yes -f -N -R $i:localhost:$_ $remote_user\@$remote_ssh_host -p $remote_ssh_port};
+        
+        if($killmode == 1)
         {
-            print qq{Successfully forwarded localhost:$_ to $remote_ssh_host:$i\n};
-            last;
+            my $running = `ps ax`;
+            my @running = split(qq{\n}, $running);
+            foreach(@running)
+            {
+                if(grep(! /^.*grep.*$/, $_) && grep( /^.*$cmd.*$/, $_))
+                {
+#                     print qq{$_\n};
+                    my ($pid) = $_ =~ /^\s*(\d+)/;
+                    if(defined $pid)
+                    {
+#                         my $killret = 0;
+                        my $killret = system(qq{kill -9 $pid});
+                        if($killret != 0)
+                        {
+                            print qq{failed to kill process $pid: $?\n}
+                        }
+                        else
+                        {
+                            last;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            $ret = system($cmd);
+            if($ret == 0)
+            {
+                print qq{Successfully forwarded localhost:$_ to $remote_ssh_host:$i\n};
+                last;
+            }
         }
     }
     if($ret != 0)
