@@ -70,7 +70,7 @@ if($remote_ssh_port !~ /\d+/)
     print qq{Please specify a valid port number\n};
     exit -1;
 }
-if($remote_ssh_host !~ /\w+/)
+if($remote_ssh_host !~ /[\w+\.\-*]*/)
 {
     print qq{Please specify a valid hostname\n};
     exit -1;
