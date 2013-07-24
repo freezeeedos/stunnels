@@ -35,32 +35,33 @@ foreach(@ARGV)
 
 foreach(@cfg)
 {
-    if($_ =~ /REMOTE_SSH_PORT=\d+/)
+    if($_ =~ /^REMOTE_SSH_PORT=\d+/)
     {
-        ($remote_ssh_port) = $_ =~ /REMOTE_SSH_PORT=(\d+)/;
+        ($remote_ssh_port) = $_ =~ /^REMOTE_SSH_PORT=(\d+)/;
     }
     
     
-    if($_ =~ /REMOTE_SSH_HOST=\w+/)
+    if($_ =~ /^REMOTE_SSH_HOST=\w+/)
     {
-        ($remote_ssh_host) = $_ =~ /REMOTE_SSH_HOST=(\w+)/;
+        ($remote_ssh_host) = $_ =~ /^REMOTE_SSH_HOST=([\w+\.\-*]*)/;
+        print qq{Remote ssh host: $remote_ssh_host\n};
     }
     
     
-    if($_ =~ /REMOTE_PORT_RANGE=\d+\/\d+/)
+    if($_ =~ /^REMOTE_PORT_RANGE=\d+\/\d+/)
     {
-        ($remote_port_range) = $_ =~ /REMOTE_PORT_RANGE=(\d+\/\d+)/;
+        ($remote_port_range) = $_ =~ /^REMOTE_PORT_RANGE=(\d+\/\d+)/;
     }
     
-    if($_ =~ /LOCAL_PORTS=.*/)
+    if($_ =~ /^LOCAL_PORTS=.*/)
     {
-        ($local_ports) = $_ =~ /LOCAL_PORTS=(.*)/;
+        ($local_ports) = $_ =~ /^LOCAL_PORTS=(.*)/;
         @localports = split( ' ', $local_ports);
     }
     
-    if($_ =~ /REMOTE_USER=\w+/)
+    if($_ =~ /^REMOTE_USER=\w+/)
     {
-        ($remote_user) = $_ =~ /REMOTE_USER=(\w+)/;
+        ($remote_user) = $_ =~ /^REMOTE_USER=(\w+)/;
     }
 }
 
