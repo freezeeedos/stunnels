@@ -43,7 +43,7 @@ foreach(@cfg)
     
     if($_ =~ /^REMOTE_SSH_HOST=\w+/)
     {
-        ($remote_ssh_host) = $_ =~ /^REMOTE_SSH_HOST=([\w+\.\-*]*)/;
+        ($remote_ssh_host) = $_ =~ /^REMOTE_SSH_HOST=([\w+\-*\.*\-*]*)/;
         print qq{Remote ssh host: $remote_ssh_host\n};
     }
     
